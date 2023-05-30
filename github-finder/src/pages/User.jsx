@@ -1,23 +1,25 @@
-import {
-  FaCode,
-  FaCodepen,
-  FaStore,
-  FaUserFriends,
-  FaUsers,
-} from "react-icons/fa";
+import { FaCodepen, FaStore, FaUserFriends, FaUsers } from "react-icons/fa";
 import { useEffect, useContext } from "react";
 import { useParams, Link } from "react-router-dom";
 import Spinner from "../components/layout/Spinner";
+import ReposList from "../components/Repos/ReposList";
 import GithubContext from "../Context/github/GithubContext";
+import { getUserAndRepos } from "../Context/github/GithubActions";
 
 function User() {
-  const { getUser, user, loading } = useContext(GithubContext);
+  const { user, loading, repos, dispatch } = useContext(GithubContext);
 
-  const params = useParams;
+  const params = useParams();
 
   useEffect(() => {
-    getUser(params.login);
-  }, []);
+    dispatch({ type: "SET_LOADING" });
+    const getUserData = async () => {
+      const userData = await getUserAndRepos(params.login);
+      dispatch({ type: "GET_USER_AND_REPOS", payload: userData });
+
+    };
+    getUserData();
+  }, [dispatch, params.login]);
 
   const {
     name,
@@ -73,7 +75,7 @@ function User() {
               <div className="mt-4 card-actions">
                 <a
                   href={html_url}
-                  target="-blank"
+                  target="_blank"
                   rel="noreferrer"
                   className="btn btn-outline"
                 >
@@ -160,6 +162,7 @@ function User() {
             </div>
           </div>
         </div>
+        <ReposList repos={repos} />
       </div>
     </>
   );
